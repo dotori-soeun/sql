@@ -62,15 +62,15 @@ WHERE sal BETWEEN 1000 AND 2000
 SELECT *
 FROM emp
 WHERE sal >= 1000 
-AND sal =< 2000;
---두 조건을 동시에 만족해야하니까 ( 안돌아가 왜??)  
+AND sal <= 2000;
+--두 조건을 동시에 만족해야하니까 ( 안돌아가 왜??) --> 부등호가 틀렸었음 <=임 (=< 아님) 
 
 SELECT *
 FROM emp
 WHERE sal >= 1000 
-  AND sal =< 2000
+  AND sal <= 2000
   AND deptno = 10;
---3조건 동시만족 ( 안돌아가 왜??)
+--3조건 동시만족 ( 안돌아가 왜??)--> 부등호가 틀렸었음 <=임 (=< 아님)
 
 emp테이블에서 입사 일자가 1982년 1월1일 이후부터 1983년 1월1일 이전인 사원의 ename, hire 데이터를 조회하는 쿼리를 작성하시오
 SELECT ename, hiredate
