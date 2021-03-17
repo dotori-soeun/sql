@@ -1,13 +1,5 @@
 --<1교시>
 연산자 우선순위 : 일반수학과  마찬가지로 괄호()를 통해 우선순위를 변경할 수 있다.
-1. 산술연산자
-2. 문자열결합
-3. 비교연산
-4. IS, [NOT] NULL,LIKE, [NOT] IN
-5. [NOT] BETWEEN
-6. NOT
-7. AND
-8. OR
 --AND가 OR보다 우선순위가 높다. : 헷갈리면 ()를 사용하여 우선순위를 조정하자
 --보통 AND, OR이 같이 나오는 경우는 없음
 
@@ -16,6 +8,7 @@ FROM emp
 WHERE ename = 'SMITH' OR ename = 'ALLEN' AND job = 'SALESMAN'
 --> ename = 'SMITH' OR ename = ('ALLEN' AND job = 'SALESMAN')
 --> 직원의 이름이 ALLEN 이면서 job이 SALESMAN 이거나, 직원의 이름이 SMITH인 직원정보를 조회
+--> OR이나 AND를 추가로 쓸 때 굳이 줄 바꿈 하지 않아도 되며 헷갈리면 괄호를 치라
 
 SELECT *
 FROM emp
@@ -82,7 +75,7 @@ FROM emp
 ORDER BY job DESC, sal ASC;
 
 정렬 :  컬럼명이 아니라 select 절의 컬럼 순서(index)
--->컬럼의 순서는 왼쪽부터 첫번째, 두번재....
+-->컬럼의 순서는 왼쪽부터 첫번째, 두번째....
 -->쌤은 이걸 추천하지 않음. 수정하면 또 변경되고 원하는 결과가 안 나올 수 있기 때문에
 -->그냥 알아들으라고 알려주심
 SELECT ename, empno, job, mgr
@@ -185,8 +178,8 @@ ROWNUM : 행번호를 부여하는 특수키워드(오라클에서만 제공)
   
 SQL 절은 다음의 순서로 실행된다
  FROM => WHERE => SELECT => ORDER BY
- ORDER BY와 ROWNUM을 동시에 사용하면 정렬된 기준으로 ROWNUM이 부여되지 않는다
- (SELECT 절이 먼저 실행되므로 ROWNUM이 부여된 상태에서 ORDER BY 절에 의해 정렬된다
+ ORDER BY와 SELECT절의 ROWNUM을 동시에 사용하면 정렬된 기준으로 ROWNUM이 부여되지 않는다
+ (SELECT 절이 먼저 실행되므로 ROWNUM이 부여된 상태에서 ORDER BY 절에 의해 정렬된다)
   
 SELECT ROWNUM, empno, ename
 FROM emp
@@ -196,7 +189,7 @@ ORDER BY ename;
     --SQL실행순서 : FROM => SELECT => ORDERBY
 
 
-인라인뷰와 ALIAS
+INLINE VIEW 와 ALIAS
 (SELECT empno, ename
 FROM emp); --> 문자가 긴 테이블처럼 인식하게 할 수 있다
 
@@ -263,14 +256,13 @@ WHERE rn BETWEEN 11 AND 20;
 
 
 emp테이블의 사원 정보를 이름컬럼으로 오름차순 적용 했을 때의 
-11~14번째 행을 다음과 같이 조회하는 쿼리를 작성해보세요 (rn, empno, ename)--> 다시 풀어보기 틀렸음
+11~14번째 행을 다음과 같이 조회하는 쿼리를 작성해보세요 (rn, empno, ename)--> 다시 풀어보니 맞음. 서두르지 말고
 SELECT *
-FROM
- (SELECT *
-    FROM(SELECT ROWNUM rn,  empno, ename
-         FROM emp)
-    ORDER BY ename ASC;)
-WHERE rn BETWEEN 11 AND 20
+FROM(SELECT ROWNUM rn, empno, ename
+     FROM(SELECT empno, ename
+            FROM emp
+        ORDER BY ename ASC))
+WHERE rn BETWEEN 11 AND 15; 
 
 
 <한정자>
@@ -284,7 +276,7 @@ FROM emp;
 --이렇게 해줄 수도 있음 (컬럼명에 영향이 가지 않음)
 
 
-<테이블 ANLAS> --> 나중에 조인배울때 emp e, emp m 이런식으로 한번에 나열해서 쓰기도 함
+<테이블 ALIAS> --> 나중에 조인배울때 emp e, emp m 이런식으로 한번에 나열해서 쓰기도 함
 -->마찬가지로 인라인 뷰에도 적용가능//인라인뷰도 하나의 테이블로 보니까
 FROM emp e;
 -->emp라고 하기 번거로워서 e라고 하고 싶어서
