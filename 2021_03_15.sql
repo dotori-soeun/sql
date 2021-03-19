@@ -1,4 +1,4 @@
-2021-03-21복습
+2021-03-11복습
 --row 14개, col 8개 <emp테이블>
 조건에 맞는 데이터 조회 : WHERE 절 - ; 기술한 조건을 참(TRUE)으로 만족하는 행들만 조회한다(FILTER); // !=,<> 다른 값 ;
 literal : 값 자체
@@ -17,15 +17,12 @@ TO_DATE('날짜 문자열', 날짜 문자열의 포맷팅) --> 날짜 타입의 
 --입사일자가 1982년 1월 1일 이후인 모든 직원 조회하는 SELECT쿼리를 작성하세요
 SELECT *
 FROM emp
-WHERE hiredate>'82/01/01';
-
-SELECT *
-FROM emp
 WHERE hiredate > TO_DATE('1982/01/01', 'YYYY/MM/DD');
-WHERE hiredate > TO_DATE('1982-01001', 'YYYY-MM-DD')
+WHERE hiredate > TO_DATE('1982-01-01', 'YYYY-MM-DD')
 WHERE hiredate > TO_DATE('19820101', 'YYYYMMDD')
 -->연도를 2자리만 82라고 하고 YY라고 하면 그 앞의 천과 백자리의 연도를 현재연도로 인식하기 때문에 2082라고 해석하여 값이 안나올 수 있음
 -->(YY 두개만 쓰면 값과 관계없이 현재서버날짜의 년도 앞 두자리를 사용)
+-->날짜비교는 반드시 TO_DATE하기~~ 그냥 '1982/01/01'보다 크다 이러면 인식 못함
 -->82년 1월1일이후 : 날짜를 비교해야하는 것 -> 오라클에서는 날짜의 대소 비교가 가능
 --> a>=b  ==  b<=a
 
@@ -73,11 +70,6 @@ WHERE sal >= 1000
 --3조건 동시만족 ( 안돌아가 왜??)--> 부등호가 틀렸었음 <=임 (=< 아님)
 
 emp테이블에서 입사 일자가 1982년 1월1일 이후부터 1983년 1월1일 이전인 사원의 ename, hire 데이터를 조회하는 쿼리를 작성하시오
-SELECT ename, hiredate
-FROM emp
-WHERE hiredate BETWEEN '1982/01/02' AND '1982/12/31';
-
--->오답노트
 SELECT ename, hiredate
 FROM emp
 WHERE hiredate BETWEEN TO_DATE ('1982/01/01','YYYY-MM-DD') AND TO_DATE ('1983/01/01','YYYY-MM-DD');
