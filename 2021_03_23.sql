@@ -71,8 +71,9 @@ FROM  product p LEFT OUTER JOIN cycle c  ON (p.pid = c.pid
 SELECT cnm, p.*, :cid, NVL(c.day, 0) day, NVL(c.cnt, 0) cnt
 FROM  product p, cycle c, customer ct
 WHERE p.pid = c.pid(+)
-  AND c.cid(+) = p.:cid
-  AND ct.cid = c.:cid(+)
+  AND c.cid = ct.cid(+)
+  AND cid = :cid
+-- AND cid = :cid 이거만 붙이면 지랄남. 그리고 고객이 안먹는 음료가 안나옴  
 
 WHERE, GROUP BY(그룹핑), JOIN : 개념정리 잘하시길 바랍니다.
 
@@ -197,6 +198,9 @@ FROM burgerstore, (SELECT x/y 도시발전지수
     WHERE STORECATEGORY IN 'LOTTERIA') Y) dosi
 WHERE sido = '대전'
   AND sigungu = '중구';
+  
+  
+  
 
 ===============================================================================================
 --테이블을 1번만 읽고 끝내는 방법
@@ -266,6 +270,15 @@ FROM burgerstore
 GROUP BY sido, sigungu
 ORDER BY sido, sigungu;
 -- 마무리는 쌤 필기 보고 하기 - 사진으로 찍어둠
+
+SELECT sido, sigungu,
+        ROUND( (SUM(DECODE(storecategory, 'BURGER KING', 1, 0)) + 
+         SUM(DECODE(storecategory, 'KFC', 1, 0)) +
+         SUM(DECODE(storecategory, 'MACDONALD', 1, 0)) ) /
+        DECODE(SUM(DECODE(storecategory, 'LOTTERIA', 1, 0)), 0, 1, SUM(DECODE(storecategory, 'LOTTERIA', 1, 0))), 2) idx
+FROM burgerstore
+GROUP BY sido, sigungu
+ORDER BY idx DESC;
 
 ========================================================================================================
 그다음 한 시간 시험 . 쌤 채점 후 나중에 돌려주신다심
