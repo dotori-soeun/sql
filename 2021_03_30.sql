@@ -33,6 +33,8 @@ CONNECT BY PRIOR empno = mgr AND job != 'ANALYST';
 
 같은 조건이라도 어디에 기술했는지에 따라 다르다
 
+인덱스 실습 PDF 해보라. 답은 정해지진 않았음
+
 ===========================================================================
 
 계층 쿼리와 관련된 특수 함수
@@ -66,7 +68,7 @@ FROM emp
 START WITH mgr IS NULL
 CONNECT BY PRIOR empno = mgr;
 --맨 왼쪽의 쓸데없는 - 을 지우기 위해 LTRIM을 썼음
---기존에 배운 TRIM 다시 떠올려보자 INSTR도
+--기존에 배운 TRIM 다시 떠올려보자 INSTR도 :아래에 내용 참고
 
 3. CONNECT_BY_ISLEAF : 얘는 특수하게 인자가 없음
     CHILD가 없는 leaf node 여부 0 - false(no leaf node) / 1 - true(leaf node)
@@ -82,11 +84,24 @@ CONNECT BY PRIOR empno = mgr;
 100개의 쿼리를 작성한다면 10~15정도가 계층쿼리라고 할 수 있겠다심
 계층쿼리 특수함수들 3개 한 번에 같이 쓰는 경우 잦으니까 꼭 외워두라심
 
+---------------------------------------------------------------------------
+여기에서 INSTR 은 자바의 str.split 과 비슷한 맥락
+    str.split -> 자바에서 이 메소드를 실행하게 되면 문자열 배열이 리턴된다.
+    String str = "킹 - 존스 - 스캇 - 아담스";
+    String [] ename = str.split("-");
+    System.out.println(Arrays.toString(ename));
+    "-" 이 단위로 잘라서 배열 안에 생성됨 : [킹 ,  존스 ,  스캇 ,  아담스]
+SQL에서 INSTR(인스트링) 이용해서 잘라서 컬럼으로 만드는 거 가능
+(참고로 문자 잘라내는 것은 SUBSTR 서브스트링)
+-- 일단 참고만
 ===========================================================================
 실습 파일 중 [게시글 계층형 쿼리 샘플 자료]
 SELECT *
 FROM board_test;
 -- 예시 okky사이트
+seq : 시퀀스. 순서 -> 클수록, 큰번호일수록 최신
+parent_seq : 부모글이 무엇인가. 이게 NULL값이면 원본글
+-- 루트가 하나가 아닐 수 있다고 했는데 [board_test]테이블이 루트가 3개임
 SELECT seq, parent_seq, LPAD(' ', (LEVEL-1)*4)||title title
 FROM board_test
 START WITH parent_seq IS NULL
@@ -123,6 +138,7 @@ UPDATE board_test SET gn=4
 WHERE seq NOT IN (1, 2, 3, 9);
 커밋
 commit;
+
 그룹번호는 큰 순, 시퀀스는 작은순
 SELECT gn, seq, parent_seq, LPAD(' ', (LEVEL-1)*4)||title title
 FROM board_test
@@ -130,6 +146,7 @@ START WITH parent_seq IS NULL
 CONNECT BY PRIOR seq = parent_seq
 ORDER siblings BY gn DESC, seq ASC;
 그룹번호와 커넥트바이루트와 같았다.  
+-- ORDERBY 에서 두번째 조건이 발동하려면 첫번째 조건으로 우열을 가릴 수 없을 때
 SELECT gn, CONNECT_BY_ROOT(seq) root_seq,
         seq, parent_seq, LPAD(' ', (LEVEL-1)*4)||title title
 FROM board_test
@@ -182,6 +199,9 @@ START WITH parent_seq IS NULL
 CONNECT BY PRIOR seq = parent_seq    
 ORDER siblings BY root_seq DESC, seq ASC;
 --쿼리는 최종적으로 이게 맞긴하다
+
+계층쿼리를 쓰면 답글의 깊이에 대해 제한을 둘 필요가 없다.
+근데 오라클만의 기능이 있어서 다른 운영체제 쓰면 불편할 수도 
 ===========================================================================
 SELECT MAX(sal)
 FROM emp
@@ -194,19 +214,34 @@ WHERE deptno = 10 --이게 추가됐넹
   AND sal = (SELECT MAX(sal)
             FROM emp
             WHERE deptno=10);
+            
+갑자기 주식
+종가(시장마감 가격) <==> 시가,
+저가(하루중 가장 낮은 가격) <==> 고가,
+전일대비 : 전일 종가와 오늘종가의 차이 : 오늘종가 - 전일종가 --> 행간 연산
+-- 행을 하나 더 만들어서 해결해도 대지만. RDBMS는 중복을 최소화 하는형태.
+    -- RDBMS의 사상과 맞지 않는다.
 
 <<분석함수(window함수)>>
+-- SQL은 행간 연산이 지원이 안됨 -> 그걸 지원하기 위해서 분석함수!!
+-- 이거 잘하면 쿼리가 정말 짧아짐
     
     SQL에서 행간 연산을 지원하는 함수
     
     해당 행의 범위를 넘어서 다른 행과 연산이 가능
      . SQL의 약점 보완
      . 이전행의 특정 컬럼을 참조
-     . 특정 범위의 행들의 컬럼의 합
+     . 특정 범위의 행들의 컬럼의 합 
+        -- 그룹바이와 비슷해보이지만 이건 SELECT절에 일반 컬럼이 오는 것도 가능
      . 특정 범위의 행중 특정 컬럼을 기준으로 순위, 행번호 부여
-    
+         
     . SUM, COUNT, AVG, MAX, MIN
     . RANK, LEAD, LAG ............
+
+분석함수는 OVER라는 키워드가 들어간다.
+SELECT window_function([arg]) 
+       OVER ([PARTITION BY columns] [ORDER BY columns] [WINDOWING])
+-- WINDOWING 은 범위 설정       
     
     
 실습1] 부서별 급여별 순위 구하기
@@ -327,7 +362,9 @@ RANK : 동일 값에 대해 동일 순위를 부여하고, 후순위는 동일�
         1등 2명이면 그 다음 순위는 3위
 DENSE_RANK : 동일 값에 대해 동일 순위를 부여하고, 후순위는 이어서 부여한다.
         1등 2명이면 그 다음 순위는 2위
+        -- DENSE : 밀집한, 밀집해있다 -> 아마도 건너뛰지 않는다라는 의미이지 않을 까나
 ROW_NUMBER : 중복 없이 행에 순차적인 번호를 부여(ROWNUM 과 비슷)
+-- 자격증 볼거면 이 셋의 차이를 알자
 
 SELECT ename, sal, deptno, 
     RANK() OVER (PARTITION BY deptno ORDER BY sal DESC) sal_rank,
