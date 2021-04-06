@@ -179,19 +179,3 @@ WHERE department_id is null;
 
 SELECT * FROM employees
 WHERE job_id = 'AD_PRES'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
