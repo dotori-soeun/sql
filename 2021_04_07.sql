@@ -261,7 +261,7 @@ END;
  - 반환값이 없음
  - 컴파일되어 서버에 보관(실행속도를 증가, 은닉성, 보안성)
  (사용형식)
- CREATE [OR REPLACE] PROCEDURE 프로시져명[(
+ CREATE [OR REPLACE] PROCEDURE 프로시져명[( -- ->프로시져명은 보통PROC_ 하고 시작한다. 
    매개변수명 [IN | OUT | INOUT] 데이터타입 [[:= | DEFAULT] expr],
    매개변수명 [IN | OUT | INOUT] 데이터타입 [[:= | DEFAULT] expr],
                             :
