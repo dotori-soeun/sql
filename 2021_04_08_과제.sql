@@ -89,3 +89,66 @@ SELECT MEM_ID FROM MEMBER
 -- 24행
 SELECT CART_MEMBER FROM CART GROUP BY CART_MEMBER
 -- 23행  
+
+
+
+
+
+
+
+(프로시저 생성 : 입력 받은 회원번호로 해당 회원의 삭제여부 컬럼값을 변경
+ CREATE OR REPLACE PROCEDURE PROC_MEM_UPDATE(
+ P_MID IN MEMBER.MEM_ID%TYPE)
+ AS
+ BEGIN
+   UPDATE MEMBER
+   SET MEM_DELETE = 'Y'
+   WHERE MEM_ID = P_MID; -- 넘겨받은 회원번호인것을 업데이트하겠다 라는 조건
+   -- AND MEM_ID NOT IN (SELECT CART_MEMBER FROM CART); 이 조건이 여기선 필요가 없었음
+   -- 나중에 필요하면 COMMIT; 이걸 여기에 추가해도 된다
+ END;  
+
+
+(구매금액이 없는 회원 : CART 테이블에 존재하지 않는 회원
+SELECT DISTINCT CART_MEMBER
+FROM CART A
+WHERE CART_NO LIKE '2005%';
+-- 이건 구매사실이 있는 사람
+SELECT MEM_ID
+FROM MEMBER
+WHERE MEM_ID NOT IN (SELECT DISTINCT CART_MEMBER
+                     FROM CART A
+                    WHERE CART_NO LIKE '2005%');
+-- 여기서 구매사실이 없는 사람
+
+
+(구매금액이 없는 회원을 커서로 만들어보자)
+DECLARE
+  CURSOR CUR_MID -- 맴버아이디를 가져오는 커서를 생성하겠다
+  IS
+    SELECT MEM_ID
+    FROM MEMBER
+    WHERE MEM_ID NOT IN (SELECT DISTINCT CART_MEMBER
+                     FROM CART A
+                    WHERE CART_NO LIKE '2005%');
+BEGIN
+  FOR REC_MID IN CUR_MID LOOP
+  --루프 안에서 커서를 이용해 아까 만들어놓은 프로슈져를 호출. 호출할 때는 반드시 매개변수를 가지고 가야한다
+    PROC_MEM_UPDATE(REC_MID.MEM_ID);
+  END LOOP;
+END;
+
+
+
+
+
+
+
+
+아 제발 문제 만들었으면 미리 스스로 검증 좀 하고 왔으면 좋겠다
+왜 수업시간에 허둥대고 있냐고 수업시간 개 아깝고 집중력 떨어짐
+수업준비 너무 맘에 들지 않는다 그러니까 본인이 느끼기에 진도가 안나가는거 같지
+제발 당분간 우리반 담당 수업이 없으면 좋겠다
+말을 해도 하나도 안통하고 참ㅋㅋ 난 저렇게 되지 말아야지
+
+
